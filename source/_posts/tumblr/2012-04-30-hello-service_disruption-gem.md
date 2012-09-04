@@ -1,0 +1,36 @@
+---
+layout: post
+title: Hello service_disruption gem
+tags:
+- Ruby
+- tfl
+- tube
+- london
+- gem
+- growl
+- osx
+---
+Well over the past few weeks I've been working on a little gem that makes it
+easy to get notifications when the [Tube](http://tfl.gov.uk) status changes.
+As a byproduct it also gives easy access to the tube data as ruby objects too
+:)
+
+Previously you'd have to actively check the TFL website, or sign up for the
+[TFL Alerts ](http://alerts.tfl.gov.uk)programme, which sends you text alerts.
+
+However service_disruption polls the TFL Data feed for changes, and if there
+are changes it will alert you using Growl.
+
+So in order to get this to work you'll need
+
+  * Ruby 1.8.7 / 1.9.3
+  * [Growl](http://growl.info/downloads)
+  * Apple Mac
+
+[Installation
+instructions](https://github.com/Frozenproduce/service_disruption) are
+available at the projects [github
+repo](https://github.com/Frozenproduce/service_disruption)
+
+As always any feedback would be great, and suggestions for improvements.
+
