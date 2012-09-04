@@ -1,16 +1,907 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[My Octopress Blog]]></title>
-  <link href="http://Frozenproduce.github.com/atom.xml" rel="self"/>
-  <link href="http://Frozenproduce.github.com/"/>
-  <updated>2012-09-04T22:21:34+01:00</updated>
-  <id>http://Frozenproduce.github.com/</id>
+  <title><![CDATA[Acts As Developer]]></title>
+  <link href="http://blog.adamcarlile.com/atom.xml" rel="self"/>
+  <link href="http://blog.adamcarlile.com/"/>
+  <updated>2012-09-05T00:14:02+01:00</updated>
+  <id>http://blog.adamcarlile.com/</id>
   <author>
-    <name><![CDATA[Your Name]]></name>
+    <name><![CDATA[Adam Carlile]]></name>
     
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Hello service_disruption gem]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2012/04/30/hello-service_disruption-gem/"/>
+    <updated>2012-04-30T00:00:00+01:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2012/04/30/hello-service_disruption-gem</id>
+    <content type="html"><![CDATA[<p>Well over the past few weeks I&#8217;ve been working on a little gem that makes it
+easy to get notifications when the <a href="http://tfl.gov.uk">Tube</a> status changes.
+As a byproduct it also gives easy access to the tube data as ruby objects too
+:)</p>
+
+<p>Previously you&#8217;d have to actively check the TFL website, or sign up for the
+<a href="http://alerts.tfl.gov.uk">TFL Alerts </a>programme, which sends you text alerts.</p>
+
+<p>However service_disruption polls the TFL Data feed for changes, and if there
+are changes it will alert you using Growl.</p>
+
+<p>So in order to get this to work you&#8217;ll need</p>
+
+<ul>
+<li>Ruby 1.8.7 / 1.9.3</li>
+<li><a href="http://growl.info/downloads">Growl</a></li>
+<li>Apple Mac</li>
+</ul>
+
+
+<p><a href="https://github.com/Frozenproduce/service_disruption">Installation
+instructions</a> are
+available at the projects <a href="https://github.com/Frozenproduce/service_disruption">github
+repo</a></p>
+
+<p>As always any feedback would be great, and suggestions for improvements.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hash extensions for dealing with CamelCase XML documents]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2012/04/24/hash-extensions-for-dealing-with-camelcase-xml-documents/"/>
+    <updated>2012-04-24T00:00:00+01:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2012/04/24/hash-extensions-for-dealing-with-camelcase-xml-documents</id>
+    <content type="html"><![CDATA[<p>I&#8217;m looking at you Microsoft web services!</p>
+
+<p>Anyway, a quick extension to the Hash class to add the rubyfy_keys! method and
+it&#8217;s recursive partners.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;active_support/core_ext&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Hash</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">rubyfy_keys!</span>
+</span><span class='line'>    <span class="n">keys</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">key</span><span class="o">|</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">[</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">underscore</span> <span class="k">rescue</span> <span class="n">key</span><span class="p">)</span> <span class="o">||</span> <span class="n">key</span><span class="o">]</span> <span class="o">=</span> <span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">recursively_rubyfy_keys!</span>
+</span><span class='line'>    <span class="n">rubyfy_keys!</span>
+</span><span class='line'>    <span class="n">values</span><span class="o">.</span><span class="n">each</span><span class="p">{</span><span class="o">|</span><span class="n">h</span><span class="o">|</span> <span class="n">h</span><span class="o">.</span><span class="n">recursively_rubyfy_keys!</span>  <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">is_a?</span><span class="p">(</span><span class="no">Hash</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>    <span class="n">values</span><span class="o">.</span><span class="n">select</span><span class="p">{</span><span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="n">v</span><span class="o">.</span><span class="n">is_a?</span><span class="p">(</span><span class="nb">Array</span><span class="p">)</span> <span class="p">}</span><span class="o">.</span><span class="n">flatten</span><span class="o">.</span><span class="n">each</span><span class="p">{</span><span class="o">|</span><span class="n">h</span><span class="o">|</span> <span class="n">h</span><span class="o">.</span><span class="n">recursively_rubyfy_keys!</span> <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">is_a?</span><span class="p">(</span><span class="no">Hash</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">recursively_symbolize_keys!</span>
+</span><span class='line'>    <span class="n">symbolize_keys!</span>
+</span><span class='line'>    <span class="n">values</span><span class="o">.</span><span class="n">each</span><span class="p">{</span><span class="o">|</span><span class="n">h</span><span class="o">|</span> <span class="n">h</span><span class="o">.</span><span class="n">recursively_symbolize_keys!</span>  <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">is_a?</span><span class="p">(</span><span class="no">Hash</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>    <span class="n">values</span><span class="o">.</span><span class="n">select</span><span class="p">{</span><span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="n">v</span><span class="o">.</span><span class="n">is_a?</span><span class="p">(</span><span class="nb">Array</span><span class="p">)</span> <span class="p">}</span><span class="o">.</span><span class="n">flatten</span><span class="o">.</span><span class="n">each</span><span class="p">{</span><span class="o">|</span><span class="n">h</span><span class="o">|</span> <span class="n">h</span><span class="o">.</span><span class="n">recursively_symbolize_keys!</span> <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">is_a?</span><span class="p">(</span><span class="no">Hash</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">recursively_rubyfy_and_symbolize_keys!</span>
+</span><span class='line'>    <span class="n">recursively_rubyfy_keys!</span>
+</span><span class='line'>    <span class="n">recursively_symbolize_keys!</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Heroku Airbrake post deploy hook]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2012/02/24/heroku-airbrake-post-deploy-hook/"/>
+    <updated>2012-02-24T00:00:00+00:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2012/02/24/heroku-airbrake-post-deploy-hook</id>
+    <content type="html"><![CDATA[<p>After a lot of trawling around the internet I couldn&#8217;t find any reference as
+to how to set up a post deploy hook for heroku. Even the
+airbrake:heroku:add_post_deploy_hook rake task didn&#8217;t seem to work, so I have
+managed to piece together my own custom post deploy hook</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>heroku addons:add deployhooks:http url='http://airbrake.io/deploys.txt?deploy[rails_env]=YOUR_ENVIRONMENT
+</span><span class='line'>                                    &api_key=YOUR_API_KEY&deploy[local_username]={user}
+</span><span class='line'>                                    &deploy[scm_repository]=git@github.com:youruser/your-repo.git&deploy[scm_revision]={head}'
+</span><span class='line'>                                    --app heroku_app_name</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I hope this can help someone!</p>
+
+<ul>
+<li><a href="http://devcenter.heroku.com/articles/deploy-hooks">Heroku post deploy hook docs</a></li>
+<li><a href="http://help.airbrake.io/kb/api-2/deploy-tracking">Airbrake post deploy hook docs</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Queuing Sunspot indexing jobs with Resque]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2012/01/17/queuing-sunspot-indexing-jobs-with-resque/"/>
+    <updated>2012-01-17T00:00:00+00:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2012/01/17/queuing-sunspot-indexing-jobs-with-resque</id>
+    <content type="html"><![CDATA[<p>I&#8217;m currently working on a social networking
+<a href="http://beta.wellbeinginthecity.me/">platform</a>(very beta!) for London, and we
+use <a href="https://github.com/defunkt/resque">Resque</a> to handle all of our
+background jobs, sending outbound mail, image processing etc.</p>
+
+<p>We recently implemented <a href="http://sunspot.github.com/">Sunspot</a> and
+<a href="http://lucene.apache.org/solr/">Solr</a> for indexing our models to allow rapid
+full text searching. Now <a href="http://sunspot.github.com/">Sunspot</a> is awesome, has
+a great DSL and makes indexing and searching super easy, it also has great
+built in support for <a href="https://github.com/tobi/delayed_job">DelayedJob</a>, which
+is another awesome background processing framework.</p>
+
+<p>However since we&#8217;ve already implemented
+<a href="https://github.com/defunkt/resque">Resque</a> it seemed the logical choice to
+integrate it with <a href="http://sunspot.github.com/">Sunspot</a>. But documentation
+seems to be patchy at best as to how to implement the queue with Resque.</p>
+
+<h2>Enter SunspotSessionProxy</h2>
+
+<p>SunspotSessionProxy is a class that sits between the
+<a href="http://sunspot.github.com/">Sunspot</a> interface and the
+<a href="http://lucene.apache.org/solr/">Solr</a> server, allowing you to change the
+behaviour of certain actions that Sunspot will perform, such as indexing,
+searching etc.</p>
+
+<p>So through this class we can modify the default behaviour of the index action
+to route it via a <a href="https://github.com/defunkt/resque">Resque</a> worker.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Sunspot</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">ResqueSessionProxy</span> <span class="o">&lt;</span> <span class="no">Sunspot</span><span class="o">::</span><span class="no">SessionProxy</span><span class="o">::</span><span class="no">AbstractSessionProxy</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">attr_reader</span> <span class="ss">:original_session</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">delegate</span> <span class="ss">:config</span><span class="p">,</span> <span class="ss">:delete_dirty?</span><span class="p">,</span> <span class="ss">:dirty?</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:new_search</span><span class="p">,</span> <span class="ss">:search</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:new_more_like_this</span><span class="p">,</span> <span class="ss">:more_like_this</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:remove</span><span class="p">,</span> <span class="ss">:remove!</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:remove_by_id</span><span class="p">,</span> <span class="ss">:remove_by_id!</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:remove_all</span><span class="p">,</span> <span class="ss">:remove_all!</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:batch</span><span class="p">,</span> <span class="ss">:commit</span><span class="p">,</span> <span class="ss">:commit_if_delete_dirty</span><span class="p">,</span> <span class="ss">:commit_if_dirty</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:index!</span><span class="p">,</span> <span class="ss">:to</span> <span class="o">=&gt;</span> <span class="ss">:session</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@original_session</span> <span class="o">=</span> <span class="n">session</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">alias_method</span> <span class="ss">:session</span><span class="p">,</span> <span class="ss">:original_session</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="o">*</span><span class="n">objects</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">args</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>      <span class="n">objects</span><span class="o">.</span><span class="n">flatten</span><span class="o">.</span><span class="n">compact</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">object</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">args</span> <span class="o">&lt;&lt;</span> <span class="n">object</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;&lt;</span> <span class="n">object</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>      <span class="no">Resque</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="no">Sunspot</span><span class="o">::</span><span class="no">IndexJob</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="k">unless</span> <span class="n">args</span><span class="o">.</span><span class="n">empty?</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This class delegates all of it&#8217;s methods to the Session class, apart from the
+index method, which we have rewritten to include a call to
+<a href="https://github.com/defunkt/resque">Resque</a> to enqueue the job.</p>
+
+<p>We also keep hold of the original session so that we can call it from inside
+the Resque worker, so we can actually run the original indexing method,
+instead of our modified index method</p>
+
+<h2>Work, Work, Work</h2>
+
+<p>Here&#8217;s the code for the <a href="https://github.com/defunkt/resque">Resque</a> worker.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Sunspot</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">IndexJob</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="vi">@queue</span> <span class="o">=</span> <span class="ss">:indexer</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">perform</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">objects</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>      <span class="n">args</span><span class="o">.</span><span class="n">each_slice</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="p">(</span><span class="n">clazz</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">object</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">constantize</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</span><span class='line'>        <span class="c1"># don&#39;t blow up if the object no longer exists in the db</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">object</span>
+</span><span class='line'>          <span class="n">objects</span> <span class="o">&lt;&lt;</span> <span class="n">object</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>      <span class="no">Sunspot</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">original_session</span><span class="o">.</span><span class="n">index!</span><span class="p">(</span><span class="o">*</span><span class="n">objects</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Very simple, just takes the arguments passed by the ResqueSessionProxy#index,
+gets all the AR objects, and then runs the original sessions index method from
+inside the worker thread</p>
+
+<h2>The Final Piece</h2>
+
+<p>Finally we have to tell <a href="https://github.com/defunkt/resque">Resque</a> to use
+this new session proxy, so just a simple line an in initialiser will do it</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Sunspot</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="no">Sunspot</span><span class="o">::</span><span class="no">ResqueSessionProxy</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Sunspot</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That&#8217;s it! Hopefully that has helped some of you, as I&#8217;ve not seen any
+documentation on this subject</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[If I could turn back TIME]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/11/01/if-i-could-turn-back-time/"/>
+    <updated>2011-11-01T00:00:00+00:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/11/01/if-i-could-turn-back-time</id>
+    <content type="html"><![CDATA[<p>Time, we can all agree, is an incredibly useful concept, unfortunately the
+recent decision to drop <code>&lt;time&gt;</code> from the HTML5 spec is not useful.</p>
+
+<p>After all every website that I&#8217;ve recently developed has made use of the
+<code>&lt;time&gt;</code> element, inside <code>&lt;article&gt;</code>, making publish dates something that hold
+semantic meaning in relation to the <code>&lt;article&gt;</code> in question.</p>
+
+<p>The decision to remove it has been wholeheartedly rejected by the developer
+community.</p>
+
+<ul>
+<li><a href="http://www.zeldman.com/2011/10/31/goodbye-html5-element/">Zeldman</a></li>
+<li><a href="http://www.brucelawson.co.uk/2011/goodbye-html5-time-hello-data/">Bruce Lawson </a></li>
+</ul>
+
+
+<p>Along with a new website,
+<a href="http://whynotime.com/">http://whynotime.com/</a>, and a
+trending hashtag <a href="https://twitter.com/#!/search/%23occupyhtml5">#occupyhtml5</a></p>
+
+<p>Github and Twitter both use the <code>&lt;time&gt;</code> tag extensively, it seems to me to be
+incredibly short sighted to remove such a useful element and replace it with
+something vague and totally meaningless, <code>&lt;data&gt;</code>. <code>&lt;data&gt;</code> can contain anything,
+and has no meaning to the <code>&lt;article&gt;</code> in question.</p>
+
+<p>It seams like a real step backwards to the days of endless <code>&lt;div&gt;</code> and <code>&lt;span&gt;</code>
+elements, except this time endless <code>&lt;data&gt;</code> elements with all sorts of
+meaningless data within, holding no semantic value whatsoever.</p>
+
+<p>I can only hope that the W3C reverse this decision for the good of the HTML5
+spec.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Meta programming, serialization]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/10/31/meta-programming-serialization/"/>
+    <updated>2011-10-31T00:00:00+00:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/10/31/meta-programming-serialization</id>
+    <content type="html"><![CDATA[<p>Oh wow, has it been that long already, I need to force myself to post
+something at least once a week, even if it&#8217;s just posting pictures of cats!</p>
+
+<p>So I&#8217;m currently working on a social media platform for London, with it&#8217;s main
+purpose being to promote a wellbeing lifestyle in a hectic city. I wrote this
+handy little utility module for creating methods from serialized data.</p>
+
+<p>Say, for example you have an object, but it can have serialized data stored
+within a hash in the database, instead of getting the data through the hash
+notation, you can now access it directly as Object.first.hash_key_name instead
+of Object.first.hash[:hash_key_name]</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ExtraFields</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">included</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">base</span><span class="o">.</span><span class="n">serialized_fields</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">method_name</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">base</span><span class="o">.</span><span class="n">class_eval</span> <span class="o">&lt;&lt;-</span><span class="no">EOS</span>
+</span><span class='line'><span class="sh">        def #{method_name.to_s}</span>
+</span><span class='line'><span class="sh">          extra_fields[:#{method_name}] if extra_fields &amp;&amp; extra_fields[:#{method_name}]</span>
+</span><span class='line'><span class="sh">        end</span>
+</span><span class='line'><span class="sh">        def #{method_name.to_s}=(value)</span>
+</span><span class='line'><span class="sh">          self.extra_fields[:#{method_name}] = value</span>
+</span><span class='line'><span class="sh">        end</span>
+</span><span class='line'><span class="no">      EOS</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is handy in two ways, you can access serialized data directly as methods
+of the class instance. Plus you can use the serialized fields directly in a
+form, as the module automatically creates the setters for the hashes keys.
+Pretty handy, you just have to specify in an array of serialized field symbols
+as a private method in the parent class.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Page</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">ExtraFields</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">serialized_fields</span>
+</span><span class='line'>      <span class="o">[</span><span class="ss">:field_one</span><span class="p">,</span> <span class="ss">:field_two</span><span class="p">,</span> <span class="ss">:another_field</span><span class="o">]</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[The Cliché-o-matic]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/06/27/the-clich-o-matic/"/>
+    <updated>2011-06-27T00:00:00+01:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/06/27/the-clich-o-matic</id>
+    <content type="html"><![CDATA[<p><a href="http://cliche.podisode.com">The Cliché-o-matic</a></p>
+
+<p>This is a little something I made up for my good friend <a href="http://alexgoy.com">Alex
+Goy</a> and the <a href="http://twitter.com/podisode">@Podisode</a>
+boys. If you&#8217;re ever stuck for clichés to use in your writing never fear, the
+cliché-o-matic is here.</p>
+
+<p>For those that are interested it&#8217;s a simple
+<a href="http://www.sinatrarb.com/">Sinatra</a> app, pulling quotes from a YAML file</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Wow, It's been a while]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/06/01/wow-its-been-a-while/"/>
+    <updated>2011-06-01T00:00:00+01:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/06/01/wow-its-been-a-while</id>
+    <content type="html"><![CDATA[<p>It&#8217;s been a while since I posted last, I really need to post at least once a
+week. Not a lot has happened really. I&#8217;m still unemployed, even though I think
+I&#8217;m pretty good at what I do it&#8217;s starting to grate on my confidence. I guess
+I&#8217;ll just keep slogging on.</p>
+
+<p>I&#8217;m keeping myself afloat with some freelance jobs, however chasing invoices
+is not something I enjoy doing. And why should I have to chase the money that
+is owed to me for work that I did in good faith anyway? It&#8217;s not like this is
+a one off, I feel like I should name and shame but I can&#8217;t quite bring myself
+to do it.</p>
+
+<p>In other news I managed to smash my MacBook Pro up. The machine was over four
+years old, and it was only a matter of time, so I think the logic board has
+burnt out, or something equally expensive. Problem being that I need a Mac in
+order to make money, so I had to bite the bullet and order another one from
+Apple. On the plus side I ensure I back up everything using Time Machine, so
+fortunately all of my work was backed up. If you don&#8217;t back up, you need to
+start now! Data is so much more valuable then hardware!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[My contribution to the Royal Wedding hysteria!]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/04/26/my-contribution-to-the-royal-wedding-hysteria/"/>
+    <updated>2011-04-26T00:00:00+01:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/04/26/my-contribution-to-the-royal-wedding-hysteria</id>
+    <content type="html"><![CDATA[<p><img src="http://24.media.tumblr.com/tumblr_lk9ne8vp5Y1qfxyc6o1_1280.png" alt="" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Back to the UK]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/04/08/back-to-the-uk/"/>
+    <updated>2011-04-08T00:00:00+01:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/04/08/back-to-the-uk</id>
+    <content type="html"><![CDATA[<p>So after four months in Canada I&#8217;ve finally made it home and I&#8217;m settling back
+in to work after having so much time off. I&#8217;ve been all over the country in
+the past week attending interviews for various positions.</p>
+
+<p>I attended an interview in Manchester to work as a volunteer for the London
+2012 Olympics, I probably talked far too much, but it was great fun to talk to
+a bunch of people who were really passionate about what the Olympics is going
+to bring to the UK. I&#8217;ve heard nothing but negative reaction in the press
+regarding the 2012 games, but I think it&#8217;s going to be a fantastic festival of
+sport for the UK. I for one cannot wait if I&#8217;m involved or not, it&#8217;s just
+going to be a fabulous summer!</p>
+
+<p>I also attended an interview for a Ruby on Rails developer position in Covent
+Garden, It was such a beautiful day, and confirmed everything I have thought
+about working in London, the buzz of the place and the cosmopolitan lifestyle
+is something that really appeals to me. I really hope I get the job!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Beautiful British Columbia]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/04/01/beautiful-british-columbia/"/>
+    <updated>2011-04-01T00:00:00+01:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/04/01/beautiful-british-columbia</id>
+    <content type="html"><![CDATA[<p>I&#8217;m writing this sat in the International Departures lounge at Vancouver
+International Airport (YVR). All I can hear is the sound of running water, and
+the occasional passenger announcement. Out of the window I can see the snow
+covered tops of the nearby Coastal Mountains glistening in the spring
+sunshine. The sky is clear and the winds calm, It really is a perfect day.</p>
+
+<p>Part of me is very excited to go back to the UK, but a part of me will always
+long to be in this beautiful area of the world. I&#8217;ll be back Vancouver! But
+it&#8217;s time for my next adventure. I&#8217;m just not looking forward to the grimy
+80&#8217;s era international arrivals hall at Heathrow, that&#8217;ll be a serious shock
+to the system!</p>
+
+<p>And to anyone thinking of making the five-thousand mile trip, do it! You won&#8217;t
+be disappointed!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[What goes up must come down]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/03/30/what-goes-up-must-come-down/"/>
+    <updated>2011-03-30T00:00:00+01:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/03/30/what-goes-up-must-come-down</id>
+    <content type="html"><![CDATA[<p>As winter slowly turns into spring it&#8217;s time to end my Canadian adventure. For
+those of you that don&#8217;t know, I&#8217;ve been living in Whistler, BC for the last
+four months. These have been some of the best four months of my life. I have
+met so many great people, and hung out with some of my best friends while I&#8217;ve
+been here.</p>
+
+<p>Whistler is one of those places that everyone who lives here is on the same
+wavelength, it&#8217;s unbelievable how easy it is to get on with anyone when you
+have so much in common. I guess that&#8217;s why I enjoyed <a href="http://leedsmetsnowsports.co.uk">university
+snowsports</a> so much, as everyone had the same
+approach to life, doing anything to get the next fix of snow! I really hope I
+will see a lot of the people I have met over here again.</p>
+
+<p><img src="http://media.tumblr.com/tumblr_liuxbeoQTx1qeg2ip.jpg" alt="" /></p>
+
+<p>In terms of resorts, Whistler is one of the most complete resorts I have ever
+been to, the village is great, plenty to do and see even if you don&#8217;t ski or
+snowboard. Well thought out, everything is within walking distance, plus great
+transit links provided by BC Transit to the surrounding area. Topped off by
+some great bars and restaurants, in no particular order here are my top five.</p>
+
+<ul>
+<li>The Garibaldi Lift Company (The GLC)</li>
+<li>Crystal Lounge</li>
+<li>Dustys</li>
+<li>Merlins</li>
+<li>Earls</li>
+</ul>
+
+
+<p>The mountains of Whistler and Blackcomb have some of the best terrain in North
+America, probably the world, steep chutes, great glades, drops, expansive
+alpine bowls. The only problem with the area, and the Coastal Mountains in
+general is its proximity to the Pacific, this gives Whistler quite a mild
+climate, it can rain in the village, and we only had a couple of bad days
+where it rained all the way to the high alpine. But when it snows, does it
+snow! The base as of the 30th of march is 3.5 meters, 3.5 meters is an
+incredible amount of snow, total accumulations this season have been in excess
+of 1,300 cm, so as you can imagine we&#8217;ve had some epic powder days! In no
+order here are my top five areas of both mountains that you must visit if you
+come to Whistler.</p>
+
+<ul>
+<li>Fraggle Rock (Skiers right off under Crystal Chair)</li>
+<li>Harmony Horseshoes/Boomer Bowl/Gun Barrels</li>
+<li>Flute Bowl (Far skiers right off Symphony + 25 minute hike)</li>
+<li>Gemstone Bowls (Off Spankies Ladder)</li>
+<li>Sun Bowl (Off Harmony ridge)</li>
+<li>Almost anything off 7th Heaven (Reservoir Trees, Xhiggies Meadow)</li>
+<li>Khybers/Million Dollar Ridge (Out of bounds, skiers left off upper peak to creek)</li>
+</ul>
+
+
+<p>I could go on and on, but as you can see it&#8217;s just endless, I have been here
+four months and haven&#8217;t even done all of the marked in bounds runs!</p>
+
+<p><img src="http://media.tumblr.com/tumblr_liuxc0n8IT1qeg2ip.jpg" alt="" /></p>
+
+<p>I&#8217;m going to miss Whistler, but I&#8217;m very excited to what the future will hold.
+I have an interview for a great position in London, and an interview for a
+position to volunteer for the London 2012 Olympics. But no doubt I&#8217;ll be back
+to Whistler next winter to see all of my friends out here and to tick off the
+rest of the areas!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Nuclear power is still the best option for a non carbon future]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/03/15/nuclear-power-is-still-the-best-option-for-a-non-carbon-future/"/>
+    <updated>2011-03-15T00:00:00+00:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/03/15/nuclear-power-is-still-the-best-option-for-a-non-carbon-future</id>
+    <content type="html"><![CDATA[<p>I&#8217;m as shocked as anyone else regarding the devastation in Japan, the scale of
+the human tragedy is inconceivable, however the main story that seems to be
+circling the news, especially in Canada, is that of this supposed &#8220;Meltdown&#8221;</p>
+
+<p>Now first of all, Meltdown conjures up images of Chernobyl and the abandoned
+town of Pripyat. To use the same term and toss it around so loosely regarding
+the incident at Fukushima is reckless. They are nowhere near the same type of
+incident, and to draw comparisons is tantamount to disinformation.</p>
+
+<p><img class="center" src="http://media.tumblr.com/tumblr_li37fyobvI1qeg2ip.jpg"></p>
+
+<p>The main issue in my opinion is a general ignorance as to the workings of a
+nuclear reactor, and nuclear physics in general. People are terrified of
+things they don&#8217;t fully understand, and nuclear power, unfortunately, is one
+of these things.</p>
+
+<p>It&#8217;s not helped by the media supplying incredibly anti-nuclear commentary,
+referring to everything as a disaster, or &#8220;meltdown&#8221;. Nuclear power when
+managed correctly is incredibly safe and clean, producing no carbon emissions
+at all, the only waste is nuclear byproducts that can be stored underground to
+decay into more stable elements.</p>
+
+<p>For example, the media was reporting yesterday that that Fukushima I was
+venting radioactive steam, however what the media failed to mention is that
+the steam contains radionuclides with very short half-lives, so after they
+were vented they rapidly decayed into stable, non-radioactive elements.</p>
+
+<p>A half-life is not something the media concerns itself with it&#8217;s content to
+allow people to believe that this steam is lethal, even though the amount of
+radiation measured during the venting was equivalent to that of a chest x-ray,
+not to mention that those elements will rapidly decay and be sent out to sea,
+never to be seen again!</p>
+
+<p>The real danger comes from cracked containment vessels, as was shown with the
+obsolete RBMK reactor types responsible for the Chernobyl disaster, however
+the BWR reactors at Fukushima have 3 levels of containment, the zircaloy fuel
+rod sheathes, the concrete core vessel, and then the outer containment vessel,
+even if the fuel rods melt down, they will not breach the containment, and it
+will not continue burning through the planet.</p>
+
+<p>The future of nuclear power is a difficult one, its about overcoming peoples
+innate fear of something they don&#8217;t fully understand, coupled with the media
+fanning the flames. However if we all want to keep using the same amount of
+electricity, and we&#8217;re committed to doing all we can to save the planet then
+we need to start the process to ditch our carbon economy.</p>
+
+<p>The first step comes with replacing our dirty fossil fuel burning power
+stations with clean nuclear power. Renewables are great, but they don&#8217;t
+produce the amount of power required to run nations, nuclear fission power is
+our best bet for staving off the effects of climate change in the immediate
+short term, while we develop ways to bring nuclear fusion reactors up to
+industrial scale. To put a halt on all nuclear power developments would be
+incredibly short sighted. After all, we all need electricity, where else are
+we gonna&#8217; get it from?</p>
+
+<p><img class="center" src="http://media.tumblr.com/tumblr_li37l8YMHj1qeg2ip.jpg"></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rendering sane markup with Rails helpers]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/03/12/rendering-sane-markup-with-rails-helpers/"/>
+    <updated>2011-03-12T00:00:00+00:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/03/12/rendering-sane-markup-with-rails-helpers</id>
+    <content type="html"><![CDATA[<p>If you, like me, have tried to use helpers to generate complex chunks of HTML
+programmaticly, then you will have noticed that <code>content_tag</code> doesn&#8217;t really
+cut it for large chunks of HTML</p>
+
+<p><code>content_tag</code> will render the HTML inline unless you manually insert line
+breaks and tabs in order to make it readable, not to mention you end up with a
+horribly nested set of methods wrapping around the content you want to display</p>
+
+<p>Looking something a little like this</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">render_user_status</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">user_signed_in?</span>
+</span><span class='line'>    <span class="n">inner_html</span> <span class="o">=</span> <span class="n">content_tag</span><span class="p">(</span><span class="ss">:span</span><span class="p">,</span> <span class="s2">&quot;Signed in as </span><span class="si">#{</span><span class="n">current_user</span><span class="o">.</span><span class="n">email</span><span class="si">}</span><span class="s2">. Not you? </span><span class="se">\n</span><span class="s2"> </span><span class="si">#{</span><span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign out&quot;</span><span class="p">,</span> <span class="n">destroy_user_session_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="n">inner_html</span> <span class="o">=</span> <span class="n">content_tag</span><span class="p">(</span><span class="ss">:span</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign up&quot;</span><span class="p">,</span> <span class="n">new_user_registration_path</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2"> or </span><span class="se">\n</span><span class="s2"> </span><span class="si">#{</span><span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign in&quot;</span><span class="p">,</span> <span class="n">new_user_session_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">content_tag</span><span class="p">(</span><span class="ss">:div</span><span class="p">,</span> <span class="n">inner_html</span><span class="p">,</span> <span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s2">&quot;user_nav&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As you can see the code looks quite unreadable, and it&#8217;s almost backwards in
+the way that it is generated, I&#8217;m creating the inner HTML first, and then
+wrapping it inside a div depending on if the user is logged in or not, there
+must be a better way to achieve the same result, while making it look nicer</p>
+
+<h2>Enter Builder</h2>
+
+<p>The builder gem is something that I have used most often for defining XML
+documents, however you can also call the Builder::XmlMarkup.new method within
+any other methods and generate XML markup inline. Using the same example, this
+is the execution using Builder::XmlMarkup instead of content_tag</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">render_user_status</span>
+</span><span class='line'>  <span class="n">xhtml</span> <span class="o">=</span> <span class="no">Builder</span><span class="o">::</span><span class="no">XmlMarkup</span><span class="o">.</span><span class="n">new</span> <span class="ss">:target</span> <span class="o">=&gt;</span> <span class="n">out</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="ss">:indent</span> <span class="o">=&gt;</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="n">xhtml</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s2">&quot;user_nav&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">user_signed_in?</span>
+</span><span class='line'>      <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;Signed in as </span><span class="si">#{</span><span class="n">current_user</span><span class="o">.</span><span class="n">email</span><span class="si">}</span><span class="s2">. Not you? &quot;</span>
+</span><span class='line'>      <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign out&quot;</span><span class="p">,</span> <span class="n">destroy_user_session_path</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign up&quot;</span><span class="p">,</span> <span class="n">new_user_registration_path</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot; or &quot;</span>
+</span><span class='line'>      <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign in&quot;</span><span class="p">,</span> <span class="n">new_user_session_path</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As you can see it&#8217;s much more readable than the previous example</p>
+
+<p>However each to their own, but I think personally the Builder gem is
+incredibly useful for creating XML style markup instead of using Rails&#8217; built
+in helpers to generate HTML. Give it a go, you might be pleasantly surprised!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[A bride on the slope!]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/03/09/a-bride-on-the-slope/"/>
+    <updated>2011-03-09T00:00:00+00:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/03/09/a-bride-on-the-slope</id>
+    <content type="html"><![CDATA[<p><img src="http://25.media.tumblr.com/tumblr_lht14yzN4V1qfxyc6o1_1280.jpg" alt="" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Windows cloud advert is bogus]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/03/02/windows-cloud-advert-is-bogus/"/>
+    <updated>2011-03-02T00:00:00+00:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/03/02/windows-cloud-advert-is-bogus</id>
+    <content type="html"><![CDATA[<p>&#8220;Yay cloud&#8221;, exclaims the happy girlfriend.</p>
+
+<p>For those of you that haven&#8217;t seen it, the advert is set in a busy airport
+departure lounge, with a bored couple who have just been informed that the
+flight is delayed for another hour. Enter Windows 7 cloud services! The
+boyfriend connects to his home machine, looks at the media library and decides
+on a show to watch.</p>
+
+<p>This show is then streamed over the network and the couple watch in bliss!</p>
+
+<p>However I&#8217;m just a little concerned as to how this actually works, if it is
+stored on your hard drive at home then how would you get enough upload
+bandwidth to stream the video? I just ran a quick test here in Whistler, I get
+0.8mbps up however the average bitrate (depending on codec) for the majority
+of videos I watch is 1mbps up. Not to mention the network overhead that goes
+with any TCP/IP communication</p>
+
+<p>So that&#8217;s a little short, unless Windows does some excessive compression, or
+it uploads your movies to a location held by Microsoft overnight, If so I
+don&#8217;t know if I&#8217;d be too happy with that!</p>
+
+<p>I may well be wrong, and missing some crucial piece of information, I just
+find it a little implausible!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Phusion Passenger 3]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/03/01/phusion-passenger-3/"/>
+    <updated>2011-03-01T00:00:00+00:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/03/01/phusion-passenger-3</id>
+    <content type="html"><![CDATA[<p>I have recently upgraded my slicehost box to Ubuntu 10.04 LTS, and upgraded
+the Passenger version to 3, the difference in performance is incredible, at
+least a 20% decrease in response times.</p>
+
+<p>However the big great news is the inclusion of a new Apache directive,</p>
+
+<p><code>PassengerMinInstances</code></p>
+
+<p>Previously passenger would spool down all of the running instances of an app
+if it was idle for too long, you could override this behaviour by setting
+PassengerPoolIdleTime to 0, however this would mean that spawned instances
+would never spin down, utilising the server even if it was getting no traffic,
+however on the flip side it meant that application initial load times were
+kept to a minimum</p>
+
+<p>The new directive allows Passenger to load the Rails framework into memory on
+the first application hit, and because all the processes will not spin down
+after that no matter how long between requests the page load will be near
+instantaneous</p>
+
+<p>For me this was the only thing that made Passenger an issue, and clients often
+complained about the long load times, however with Passenger 3 this load time
+is negated to the first time the app is loaded after an Apache restart</p>
+
+<p>If you haven&#8217;t already I recommend that you upgrade all of your existing
+Passenger implementations to version 3</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Over on 7th Heaven, looking over towards the Symphony Amphitheater]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/02/27/over-on-7th-heaven-looking-over-towards-the-symphony-amphitheater/"/>
+    <updated>2011-02-27T00:00:00+00:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/02/27/over-on-7th-heaven-looking-over-towards-the-symphony-amphitheater</id>
+    <content type="html"><![CDATA[<p><img src="http://25.media.tumblr.com/tumblr_lhajkhBvrY1qfxyc6o1_1280.jpg" alt="" /></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Gravatar helper for Ruby on Rails]]></title>
+    <link href="http://blog.adamcarlile.com/blog/2011/02/27/gravatar-helper-for-ruby-on-rails/"/>
+    <updated>2011-02-27T00:00:00+00:00</updated>
+    <id>http://blog.adamcarlile.com/blog/2011/02/27/gravatar-helper-for-ruby-on-rails</id>
+    <content type="html"><![CDATA[<p>So, I was working on a project a while ago with user comments, and wanted each
+person to have their own avatar, however, the Gravatar plugins that existed
+for Rails seemed a bit too much overkill for my needs.</p>
+
+<p>So I wrote this simple helper method. Either copy the method into your
+application_helper.rb, or alternatively drop it into your lib directory and
+include it.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">GravatarHelper</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">gravatize</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">{})</span>
+</span><span class='line'>    <span class="n">default_options</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:size</span> <span class="o">=&gt;</span> <span class="mi">60</span><span class="p">}</span>
+</span><span class='line'>    <span class="n">options</span> <span class="o">=</span> <span class="n">default_options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">crypted_email</span> <span class="o">=</span> <span class="no">Digest</span><span class="o">::</span><span class="no">MD5</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">output</span> <span class="o">=</span> <span class="s2">&quot;http://www.gravatar.com/avatar/</span><span class="si">#{</span><span class="n">crypted_email</span><span class="si">}</span><span class="s2">?s=</span><span class="si">#{</span><span class="n">options</span><span class="o">[</span><span class="ss">:size</span><span class="o">]</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">image_tag</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Usage is as simple as just calling:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gravatize</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="ss">:size</span> <span class="o">=&gt;</span> <span class="mi">50</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This will just render the Gravatar inside an image tag, simple no!</p>
+]]></content>
+  </entry>
   
 </feed>

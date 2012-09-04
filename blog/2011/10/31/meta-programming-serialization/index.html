@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Meta programming, serialization - Acts As Developer</title>
+  <meta name="author" content="Adam Carlile">
+
+  
+  <meta name="description" content="Oh wow, has it been that long already, I need to force myself to post
+something at least once a week, even if it&#8217;s just posting pictures of &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://blog.adamcarlile.com/blog/2011/10/31/meta-programming-serialization/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Acts As Developer" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Acts As Developer</a></h1>
+  
+    <h2>The ramblings of a Ruby developer living in London</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:blog.adamcarlile.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Meta Programming, Serialization</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-10-31T00:00:00+00:00" pubdate data-updated="true">Oct 31<span>st</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Oh wow, has it been that long already, I need to force myself to post
+something at least once a week, even if it&#8217;s just posting pictures of cats!</p>
+
+<p>So I&#8217;m currently working on a social media platform for London, with it&#8217;s main
+purpose being to promote a wellbeing lifestyle in a hectic city. I wrote this
+handy little utility module for creating methods from serialized data.</p>
+
+<p>Say, for example you have an object, but it can have serialized data stored
+within a hash in the database, instead of getting the data through the hash
+notation, you can now access it directly as Object.first.hash_key_name instead
+of Object.first.hash[:hash_key_name]</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">ExtraFields</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">included</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">base</span><span class="o">.</span><span class="n">serialized_fields</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">method_name</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">base</span><span class="o">.</span><span class="n">class_eval</span> <span class="o">&lt;&lt;-</span><span class="no">EOS</span>
+</span><span class='line'><span class="sh">        def #{method_name.to_s}</span>
+</span><span class='line'><span class="sh">          extra_fields[:#{method_name}] if extra_fields &amp;&amp; extra_fields[:#{method_name}]</span>
+</span><span class='line'><span class="sh">        end</span>
+</span><span class='line'><span class="sh">        def #{method_name.to_s}=(value)</span>
+</span><span class='line'><span class="sh">          self.extra_fields[:#{method_name}] = value</span>
+</span><span class='line'><span class="sh">        end</span>
+</span><span class='line'><span class="no">      EOS</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This is handy in two ways, you can access serialized data directly as methods
+of the class instance. Plus you can use the serialized fields directly in a
+form, as the module automatically creates the setters for the hashes keys.
+Pretty handy, you just have to specify in an array of serialized field symbols
+as a private method in the parent class.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Page</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">ExtraFields</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">serialized_fields</span>
+</span><span class='line'>      <span class="o">[</span><span class="ss">:field_one</span><span class="p">,</span> <span class="ss">:field_two</span><span class="p">,</span> <span class="ss">:another_field</span><span class="o">]</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Adam Carlile</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-10-31T00:00:00+00:00" pubdate data-updated="true">Oct 31<span>st</span>, 2011</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.adamcarlile.com/blog/2011/10/31/meta-programming-serialization/" data-via="Frozenproduce" data-counturl="http://blog.adamcarlile.com/blog/2011/10/31/meta-programming-serialization/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2011/06/27/the-clich-o-matic/" title="Previous Post: The Cliché-o-matic">&laquo; The Cliché-o-matic</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2011/11/01/if-i-could-turn-back-time/" title="Next Post: If I could turn back TIME">If I could turn back TIME &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/04/30/hello-service_disruption-gem/">Hello service_disruption gem</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/24/hash-extensions-for-dealing-with-camelcase-xml-documents/">Hash extensions for dealing with CamelCase XML documents</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/24/heroku-airbrake-post-deploy-hook/">Heroku Airbrake post deploy hook</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/17/queuing-sunspot-indexing-jobs-with-resque/">Queuing Sunspot indexing jobs with Resque</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/01/if-i-could-turn-back-time/">If I could turn back TIME</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Frozenproduce">@Frozenproduce</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Frozenproduce',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("Frozenproduce", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/Frozenproduce" class="twitter-follow-button" data-show-count="false">Follow @Frozenproduce</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Adam Carlile -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

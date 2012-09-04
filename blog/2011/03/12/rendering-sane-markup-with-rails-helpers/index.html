@@ -1,0 +1,333 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Rendering sane markup with Rails helpers - Acts As Developer</title>
+  <meta name="author" content="Adam Carlile">
+
+  
+  <meta name="description" content="If you, like me, have tried to use helpers to generate complex chunks of HTML
+programmaticly, then you will have noticed that content_tag doesn&#8217 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://blog.adamcarlile.com/blog/2011/03/12/rendering-sane-markup-with-rails-helpers/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Acts As Developer" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Acts As Developer</a></h1>
+  
+    <h2>The ramblings of a Ruby developer living in London</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:blog.adamcarlile.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Rendering Sane Markup With Rails Helpers</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-03-12T00:00:00+00:00" pubdate data-updated="true">Mar 12<span>th</span>, 2011</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>If you, like me, have tried to use helpers to generate complex chunks of HTML
+programmaticly, then you will have noticed that <code>content_tag</code> doesn&#8217;t really
+cut it for large chunks of HTML</p>
+
+<p><code>content_tag</code> will render the HTML inline unless you manually insert line
+breaks and tabs in order to make it readable, not to mention you end up with a
+horribly nested set of methods wrapping around the content you want to display</p>
+
+<p>Looking something a little like this</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">render_user_status</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">user_signed_in?</span>
+</span><span class='line'>    <span class="n">inner_html</span> <span class="o">=</span> <span class="n">content_tag</span><span class="p">(</span><span class="ss">:span</span><span class="p">,</span> <span class="s2">&quot;Signed in as </span><span class="si">#{</span><span class="n">current_user</span><span class="o">.</span><span class="n">email</span><span class="si">}</span><span class="s2">. Not you? </span><span class="se">\n</span><span class="s2"> </span><span class="si">#{</span><span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign out&quot;</span><span class="p">,</span> <span class="n">destroy_user_session_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="n">inner_html</span> <span class="o">=</span> <span class="n">content_tag</span><span class="p">(</span><span class="ss">:span</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign up&quot;</span><span class="p">,</span> <span class="n">new_user_registration_path</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="se">\n</span><span class="s2"> or </span><span class="se">\n</span><span class="s2"> </span><span class="si">#{</span><span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign in&quot;</span><span class="p">,</span> <span class="n">new_user_session_path</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">content_tag</span><span class="p">(</span><span class="ss">:div</span><span class="p">,</span> <span class="n">inner_html</span><span class="p">,</span> <span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s2">&quot;user_nav&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As you can see the code looks quite unreadable, and it&#8217;s almost backwards in
+the way that it is generated, I&#8217;m creating the inner HTML first, and then
+wrapping it inside a div depending on if the user is logged in or not, there
+must be a better way to achieve the same result, while making it look nicer</p>
+
+<h2>Enter Builder</h2>
+
+<p>The builder gem is something that I have used most often for defining XML
+documents, however you can also call the Builder::XmlMarkup.new method within
+any other methods and generate XML markup inline. Using the same example, this
+is the execution using Builder::XmlMarkup instead of content_tag</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">render_user_status</span>
+</span><span class='line'>  <span class="n">xhtml</span> <span class="o">=</span> <span class="no">Builder</span><span class="o">::</span><span class="no">XmlMarkup</span><span class="o">.</span><span class="n">new</span> <span class="ss">:target</span> <span class="o">=&gt;</span> <span class="n">out</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="ss">:indent</span> <span class="o">=&gt;</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="n">xhtml</span><span class="o">.</span><span class="n">div</span><span class="p">(</span><span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s2">&quot;user_nav&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">user_signed_in?</span>
+</span><span class='line'>      <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;Signed in as </span><span class="si">#{</span><span class="n">current_user</span><span class="o">.</span><span class="n">email</span><span class="si">}</span><span class="s2">. Not you? &quot;</span>
+</span><span class='line'>      <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign out&quot;</span><span class="p">,</span> <span class="n">destroy_user_session_path</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign up&quot;</span><span class="p">,</span> <span class="n">new_user_registration_path</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot; or &quot;</span>
+</span><span class='line'>      <span class="n">x</span> <span class="o">&lt;&lt;</span> <span class="n">link_to</span><span class="p">(</span><span class="s2">&quot;Sign in&quot;</span><span class="p">,</span> <span class="n">new_user_session_path</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As you can see it&#8217;s much more readable than the previous example</p>
+
+<p>However each to their own, but I think personally the Builder gem is
+incredibly useful for creating XML style markup instead of using Rails&#8217; built
+in helpers to generate HTML. Give it a go, you might be pleasantly surprised!</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Adam Carlile</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2011-03-12T00:00:00+00:00" pubdate data-updated="true">Mar 12<span>th</span>, 2011</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.adamcarlile.com/blog/2011/03/12/rendering-sane-markup-with-rails-helpers/" data-via="Frozenproduce" data-counturl="http://blog.adamcarlile.com/blog/2011/03/12/rendering-sane-markup-with-rails-helpers/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2011/03/09/a-bride-on-the-slope/" title="Previous Post: A bride on the slope!">&laquo; A bride on the slope!</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2011/03/15/nuclear-power-is-still-the-best-option-for-a-non-carbon-future/" title="Next Post: Nuclear power is still the best option for a non carbon future">Nuclear power is still the best option for a non carbon future &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/04/30/hello-service_disruption-gem/">Hello service_disruption gem</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/24/hash-extensions-for-dealing-with-camelcase-xml-documents/">Hash extensions for dealing with CamelCase XML documents</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/24/heroku-airbrake-post-deploy-hook/">Heroku Airbrake post deploy hook</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/17/queuing-sunspot-indexing-jobs-with-resque/">Queuing Sunspot indexing jobs with Resque</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/01/if-i-could-turn-back-time/">If I could turn back TIME</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Frozenproduce">@Frozenproduce</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Frozenproduce',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("Frozenproduce", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/Frozenproduce" class="twitter-follow-button" data-show-count="false">Follow @Frozenproduce</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Adam Carlile -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

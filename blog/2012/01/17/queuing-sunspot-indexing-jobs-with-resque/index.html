@@ -1,0 +1,426 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Queuing Sunspot indexing jobs with Resque - Acts As Developer</title>
+  <meta name="author" content="Adam Carlile">
+
+  
+  <meta name="description" content="I&#8217;m currently working on a social networking
+platform(very beta!) for London, and we
+use Resque to handle all of our
+background jobs, sending &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://blog.adamcarlile.com/blog/2012/01/17/queuing-sunspot-indexing-jobs-with-resque/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="/javascripts/ender.js"></script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <link href="/atom.xml" rel="alternate" title="Acts As Developer" type="application/atom+xml">
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Acts As Developer</a></h1>
+  
+    <h2>The ramblings of a Ruby developer living in London</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:blog.adamcarlile.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Queuing Sunspot Indexing Jobs With Resque</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-17T00:00:00+00:00" pubdate data-updated="true">Jan 17<span>th</span>, 2012</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>I&#8217;m currently working on a social networking
+<a href="http://beta.wellbeinginthecity.me/">platform</a>(very beta!) for London, and we
+use <a href="https://github.com/defunkt/resque">Resque</a> to handle all of our
+background jobs, sending outbound mail, image processing etc.</p>
+
+<p>We recently implemented <a href="http://sunspot.github.com/">Sunspot</a> and
+<a href="http://lucene.apache.org/solr/">Solr</a> for indexing our models to allow rapid
+full text searching. Now <a href="http://sunspot.github.com/">Sunspot</a> is awesome, has
+a great DSL and makes indexing and searching super easy, it also has great
+built in support for <a href="https://github.com/tobi/delayed_job">DelayedJob</a>, which
+is another awesome background processing framework.</p>
+
+<p>However since we&#8217;ve already implemented
+<a href="https://github.com/defunkt/resque">Resque</a> it seemed the logical choice to
+integrate it with <a href="http://sunspot.github.com/">Sunspot</a>. But documentation
+seems to be patchy at best as to how to implement the queue with Resque.</p>
+
+<h2>Enter SunspotSessionProxy</h2>
+
+<p>SunspotSessionProxy is a class that sits between the
+<a href="http://sunspot.github.com/">Sunspot</a> interface and the
+<a href="http://lucene.apache.org/solr/">Solr</a> server, allowing you to change the
+behaviour of certain actions that Sunspot will perform, such as indexing,
+searching etc.</p>
+
+<p>So through this class we can modify the default behaviour of the index action
+to route it via a <a href="https://github.com/defunkt/resque">Resque</a> worker.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Sunspot</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">ResqueSessionProxy</span> <span class="o">&lt;</span> <span class="no">Sunspot</span><span class="o">::</span><span class="no">SessionProxy</span><span class="o">::</span><span class="no">AbstractSessionProxy</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">attr_reader</span> <span class="ss">:original_session</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">delegate</span> <span class="ss">:config</span><span class="p">,</span> <span class="ss">:delete_dirty?</span><span class="p">,</span> <span class="ss">:dirty?</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:new_search</span><span class="p">,</span> <span class="ss">:search</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:new_more_like_this</span><span class="p">,</span> <span class="ss">:more_like_this</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:remove</span><span class="p">,</span> <span class="ss">:remove!</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:remove_by_id</span><span class="p">,</span> <span class="ss">:remove_by_id!</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:remove_all</span><span class="p">,</span> <span class="ss">:remove_all!</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:batch</span><span class="p">,</span> <span class="ss">:commit</span><span class="p">,</span> <span class="ss">:commit_if_delete_dirty</span><span class="p">,</span> <span class="ss">:commit_if_dirty</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">:index!</span><span class="p">,</span> <span class="ss">:to</span> <span class="o">=&gt;</span> <span class="ss">:session</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+</span><span class='line'>      <span class="vi">@original_session</span> <span class="o">=</span> <span class="n">session</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">alias_method</span> <span class="ss">:session</span><span class="p">,</span> <span class="ss">:original_session</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="o">*</span><span class="n">objects</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">args</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>      <span class="n">objects</span><span class="o">.</span><span class="n">flatten</span><span class="o">.</span><span class="n">compact</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">object</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">args</span> <span class="o">&lt;&lt;</span> <span class="n">object</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">name</span> <span class="o">&lt;&lt;</span> <span class="n">object</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>      <span class="no">Resque</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="no">Sunspot</span><span class="o">::</span><span class="no">IndexJob</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="k">unless</span> <span class="n">args</span><span class="o">.</span><span class="n">empty?</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This class delegates all of it&#8217;s methods to the Session class, apart from the
+index method, which we have rewritten to include a call to
+<a href="https://github.com/defunkt/resque">Resque</a> to enqueue the job.</p>
+
+<p>We also keep hold of the original session so that we can call it from inside
+the Resque worker, so we can actually run the original indexing method,
+instead of our modified index method</p>
+
+<h2>Work, Work, Work</h2>
+
+<p>Here&#8217;s the code for the <a href="https://github.com/defunkt/resque">Resque</a> worker.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Sunspot</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">IndexJob</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="vi">@queue</span> <span class="o">=</span> <span class="ss">:indexer</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">perform</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">objects</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>      <span class="n">args</span><span class="o">.</span><span class="n">each_slice</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="p">(</span><span class="n">clazz</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">object</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">constantize</span><span class="o">.</span><span class="n">find_by_id</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</span><span class='line'>        <span class="c1"># don&#39;t blow up if the object no longer exists in the db</span>
+</span><span class='line'>        <span class="k">if</span> <span class="n">object</span>
+</span><span class='line'>          <span class="n">objects</span> <span class="o">&lt;&lt;</span> <span class="n">object</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>      <span class="no">Sunspot</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">original_session</span><span class="o">.</span><span class="n">index!</span><span class="p">(</span><span class="o">*</span><span class="n">objects</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Very simple, just takes the arguments passed by the ResqueSessionProxy#index,
+gets all the AR objects, and then runs the original sessions index method from
+inside the worker thread</p>
+
+<h2>The Final Piece</h2>
+
+<p>Finally we have to tell <a href="https://github.com/defunkt/resque">Resque</a> to use
+this new session proxy, so just a simple line an in initialiser will do it</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Sunspot</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="no">Sunspot</span><span class="o">::</span><span class="no">ResqueSessionProxy</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Sunspot</span><span class="o">.</span><span class="n">session</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That&#8217;s it! Hopefully that has helped some of you, as I&#8217;ve not seen any
+documentation on this subject</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Adam Carlile</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-01-17T00:00:00+00:00" pubdate data-updated="true">Jan 17<span>th</span>, 2012</time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="http://twitter.com/share" class="twitter-share-button" data-url="http://blog.adamcarlile.com/blog/2012/01/17/queuing-sunspot-indexing-jobs-with-resque/" data-via="Frozenproduce" data-counturl="http://blog.adamcarlile.com/blog/2012/01/17/queuing-sunspot-indexing-jobs-with-resque/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2011/11/01/if-i-could-turn-back-time/" title="Previous Post: If I could turn back TIME">&laquo; If I could turn back TIME</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2012/02/24/heroku-airbrake-post-deploy-hook/" title="Next Post: Heroku Airbrake post deploy hook">Heroku Airbrake post deploy hook &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2012/04/30/hello-service_disruption-gem/">Hello service_disruption gem</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/04/24/hash-extensions-for-dealing-with-camelcase-xml-documents/">Hash extensions for dealing with CamelCase XML documents</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/02/24/heroku-airbrake-post-deploy-hook/">Heroku Airbrake post deploy hook</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2012/01/17/queuing-sunspot-indexing-jobs-with-resque/">Queuing Sunspot indexing jobs with Resque</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2011/11/01/if-i-could-turn-back-time/">If I could turn back TIME</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/Frozenproduce">@Frozenproduce</a> on GitHub
+  
+  <script type="text/javascript">
+    $.domReady(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'Frozenproduce',
+            count: 5,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+<section>
+  <h1>Latest Tweets</h1>
+  <ul id="tweets">
+    <li class="loading">Status updating...</li>
+  </ul>
+  <script type="text/javascript">
+    $.domReady(function(){
+      getTwitterFeed("Frozenproduce", 4, false);
+    });
+  </script>
+  <script src="/javascripts/twitter.js" type="text/javascript"> </script>
+  
+    <a href="http://twitter.com/Frozenproduce" class="twitter-follow-button" data-show-count="false">Follow @Frozenproduce</a>
+  
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2012 - Adam Carlile -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = 'http://platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
